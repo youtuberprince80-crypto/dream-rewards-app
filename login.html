@@ -1,0 +1,358 @@
+Bishal Prasad:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CoinRush Login</title>
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+min-height:100vh;
+font-family:Arial,sans-serif;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+color:#fff;
+background:linear-gradient(135deg,#080b20,#171044,#06233b)
+}
+.box{
+width:100%;
+max-width:390px;
+padding:28px;
+border-radius:25px;
+background:#11152e;
+border:1px solid #ffffff18;
+box-shadow:0 20px 60px #0008
+}
+.logo{
+text-align:center;
+font-size:30px;
+font-weight:900;
+margin-bottom:5px
+}
+.sub{
+text-align:center;
+color:#aaa;
+margin-bottom:25px
+}
+input{
+width:100%;
+padding:15px;
+margin:7px 0;
+border-radius:13px;
+border:1px solid #ffffff20;
+background:#ffffff0d;
+color:#fff;
+font-size:15px;
+outline:none
+}
+button{
+width:100%;
+padding:15px;
+margin-top:10px;
+border:0;
+border-radius:13px;
+font-size:15px;
+font-weight:800;
+color:#fff;
+background:linear-gradient(135deg,#7c3aed,#06b6d4);
+cursor:pointer
+}
+.secondary{
+background:#ffffff12
+}
+#register{
+display:none
+}
+.msg{
+text-align:center;
+margin-top:15px;
+font-size:13px;
+color:#aaa
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<div class="logo">🪙 CoinRush</div>
+<div class="sub">Earn More Coins 🚀</div>
+
+<!-- LOGIN -->
+
+<div id="login">
+
+<h2>Welcome Back 👋</h2>
+
+<input
+id="loginMobile"
+type="tel"
+maxlength="10"
+placeholder="📱 Mobile Number"
+>
+
+<input
+id="loginPassword"
+type="password"
+placeholder="🔑 Password"
+>
+
+<button onclick="login()">LOGIN</button>
+
+<button class="secondary" onclick="showRegister()">
+CREATE NEW ACCOUNT
+</button>
+
+</div>
+
+
+<!-- REGISTER -->
+
+<div id="register">
+
+<h2>Create Account 🚀</h2>
+
+<input
+id="regMobile"
+type="tel"
+maxlength="10"
+placeholder="📱 Mobile Number"
+>
+
+<input
+id="regPassword"
+type="password"
+placeholder="🔑 Create Password"
+>
+
+<input
+id="regPassword2"
+type="password"
+placeholder="🔑 Confirm Password"
+>
+
+<button onclick="register()">REGISTER</button>
+
+<button class="secondary" onclick="showLogin()">
+← BACK TO LOGIN
+</button>
+
+</div>
+
+<div class="msg" id="msg"></div>
+
+</div>
+
+
+<script>
+
+/*
+IMPORTANT:
+Backend deploy hone ke baad
+is URL ko apne backend URL se replace karna.
+*/
+
+const API_URL="YOUR_BACKEND_URL";
+
+
+function showRegister(){
+
+document.getElementById("login").style.display="none";
+document.getElementById("register").style.display="block";
+document.getElementById("msg").textContent="";
+
+}
+
+
+function showLogin(){
+
+document.getElementById("register").style.display="none";
+document.getElementById("login").style.display="block";
+document.getElementById("msg").textContent="";
+
+}
+
+
+function message(text){
+
+document.getElementById("msg").textContent=text;
+
+}
+
+
+async function register(){
+
+const mobile=document.getElementById("regMobile").value.trim();
+
+const password=document.getElementById("regPassword").value;
+
+const password2=document.getElementById("regPassword2").value;
+
+
+if(!/^[0-9]{10}$/.test(mobile)){
+
+message("❌ Enter valid 10 digit mobile number");
+return;
+
+}
+
+
+if(password.length<6){
+
+message("❌ Password must be at least 6 characters");
+return;
+
+}
+
+
+if(password!==password2){
+
+message("❌ Passwords do not match");
+return;
+
+}
+
+
+message("Creating account...");
+
+
+try{
+
+const response=await fetch(
+API_URL+"/api/register",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+mobile:mobile,
+password:password
+})
+}
+);
+
+
+const data=await response.json();
+
+
+if(!data.success){
+
+message("❌ "+data.message);
+return;
+
+}
+
+
+localStorage.setItem(
+"coinrush_token",
+data.token
+);
+
+
+message("✅ Account created!");
+
+
+setTimeout(function(){
+
+window.location.href="index.html";
+
+},700);
+
+
+}catch(error){
+
+message("❌ Backend connection failed");
+
+}
+
+}
+
+
+async function login(){
+
+const mobile=document.getElementById("loginMobile").value.trim();
+
+const password=document.getElementById("loginPassword").value;
+
+
+if(!/^[0-9]{10}$/.test(mobile)){
+
+message("❌ Enter valid 10 digit mobile number");
+return;
+
+}
+
+
+if(!password){
+
+message("❌ Enter password");
+return;
+
+}
+
+
+message("Logging in...");
+
+
+try{
+
+const response=await fetch(
+API_URL+"/api/login",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+mobile:mobile,
+password:password
+})
+}
+);
+
+
+const data=await response.json();
+
+
+if(!data.success){
+
+message("❌ "+data.message);
+return;
+
+}
+
+
+localStorage.setItem(
+"coinrush_token",
+data.token
+);
+
+
+message("✅ Login successful!");
+
+
+setTimeout(function(){
+
+window.location.href="index.html";
+
+},700);
+
+
+}catch(error){
+
+message("❌ Backend connection failed");
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
